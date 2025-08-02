@@ -143,23 +143,48 @@ export function useVoice(): UseVoiceReturn {
     setIsSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // Set voice language
+    // Set voice language with fallbacks
+    let targetLang = 'en-IN';
     switch (currentLanguage) {
       case 'hindi':
-        utterance.lang = 'hi-IN';
+        targetLang = 'hi-IN';
         break;
       case 'telugu':
-        utterance.lang = 'te-IN';
+        targetLang = 'te-IN';
         break;
       default:
-        utterance.lang = 'en-IN';
+        targetLang = 'en-IN';
     }
+    
+    utterance.lang = targetLang;
+
+    // Try to find a specific voice for the language
+    const voices = speechSynthesis.getVoices();
+    const targetVoice = voices.find(voice => 
+      voice.lang.startsWith(targetLang.split('-')[0]) || 
+      voice.lang === targetLang
+    );
+    
+    if (targetVoice) {
+      utterance.voice = targetVoice;
+    } else if (currentLanguage === 'telugu') {
+      // Fallback to Hindi for Telugu if no Telugu voice available
+      const hindiVoice = voices.find(voice => voice.lang.startsWith('hi'));
+      if (hindiVoice) {
+        utterance.voice = hindiVoice;
+        utterance.lang = 'hi-IN';
+      }
+    }
+
+    utterance.rate = 0.9; // Slightly slower for better clarity
+    utterance.pitch = 1.0;
 
     utterance.onend = () => {
       setIsSpeaking(false);
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (event) => {
+      console.warn('Speech synthesis error:', event);
       setIsSpeaking(false);
     };
 
