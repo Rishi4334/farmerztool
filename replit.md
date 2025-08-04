@@ -1,0 +1,42 @@
+# Project Overview
+
+This is a full-stack JavaScript application being migrated from Replit Agent to Replit environment.
+
+## Architecture
+- **Frontend**: React with Vite, using TypeScript
+- **Backend**: Express.js server with TypeScript
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Database**: Configured for Drizzle ORM with PostgreSQL support
+- **State Management**: TanStack Query for server state
+- **Routing**: Wouter for frontend routing
+
+## Key Features
+- Modern React with TypeScript
+- Express backend API
+- Drizzle ORM for database operations
+- Radix UI components with shadcn
+- Form handling with react-hook-form
+- Authentication setup with Passport.js
+
+## Project Structure
+- `client/` - React frontend application
+- `server/` - Express backend server
+- `shared/` - Shared TypeScript schemas and types
+- `components.json` - shadcn/ui configuration
+
+## Development Setup
+- Run `npm run dev` to start both frontend and backend
+- Backend runs on Express with Vite integration
+- Frontend served through Vite with HMR
+
+## Recent Changes
+- 2025-01-04: Started migration from Replit Agent to Replit environment
+- 2025-01-04: Installing missing dependencies (cross-env)
+
+## User Preferences
+- Not specified yet
+
+## Migration Status
+- Installing required packages
+- Verifying project functionality
+- Ensuring security best practices
