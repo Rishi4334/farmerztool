@@ -6,7 +6,7 @@ This is a full-stack JavaScript application being migrated from Replit Agent to 
 - **Frontend**: React with Vite, using TypeScript
 - **Backend**: Express.js server with TypeScript
 - **Styling**: Tailwind CSS with shadcn/ui components
-- **Database**: Configured for Drizzle ORM with PostgreSQL support
+- **Database**: Configured for Drizzle ORM with MySQL support
 - **State Management**: TanStack Query for server state
 - **Routing**: Wouter for frontend routing
 
@@ -32,9 +32,13 @@ This is a full-stack JavaScript application being migrated from Replit Agent to 
 ## Recent Changes
 - 2025-01-04: Started migration from Replit Agent to Replit environment
 - 2025-01-04: Installing missing dependencies (cross-env)
+- 2025-01-04: Migrated backend database from PostgreSQL to MySQL
+  - Updated all table schemas to use MySQL syntax
+  - Installed mysql2 client package
+  - Modified UUID generation for MySQL compatibility
 
 ## User Preferences
-- Not specified yet
+- Prefers MySQL over PostgreSQL for backend database
 
 ## Migration Status
 - ✅ Migration completed successfully
