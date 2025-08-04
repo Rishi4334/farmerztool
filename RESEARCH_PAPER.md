@@ -57,7 +57,7 @@ The FarmerZ platform employs a modern full-stack architecture:
 
 **Backend Technologies:**
 - Node.js with Express.js for RESTful APIs
-- PostgreSQL with Drizzle ORM for data persistence
+- MySQL with Drizzle ORM for data persistence
 - Serverless architecture for scalability
 
 **Key Features:**
@@ -105,7 +105,7 @@ Backend (Express.js API)
 ├── Real-time Notifications
 └── Analytics Engine
 
-Database (PostgreSQL)
+Database (MySQL)
 ├── User Profiles
 ├── Crop Information
 ├── Disease Detection History

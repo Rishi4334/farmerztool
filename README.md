@@ -66,10 +66,10 @@ FarmerZ is a cutting-edge agricultural technology platform that empowers farmers
 
 ### Backend Stack
 - **Express.js** RESTful API server
-- **PostgreSQL** with Neon serverless database
+- **MySQL** database with mysql2 client
 - **Drizzle ORM** for type-safe database operations
 - **Passport.js** for authentication
-- **Connect-PG-Simple** for session management
+- **Session management** with secure storage
 
 ### Development Tools
 - **Vite** for fast development and building
@@ -81,7 +81,7 @@ FarmerZ is a cutting-edge agricultural technology platform that empowers farmers
 
 ### Prerequisites
 - Node.js 18.0.0 or higher
-- PostgreSQL database (or Neon account)
+- MySQL database
 - Git
 
 ### Installation
@@ -148,7 +148,7 @@ farmerz/
 
 ### Database Schema
 
-The application uses a comprehensive PostgreSQL schema with the following main entities:
+The application uses a comprehensive MySQL schema with the following main entities:
 
 - **Users**: Farmer profiles with multi-language preferences
 - **Crops**: Crop information with local language names
@@ -211,7 +211,7 @@ The platform is designed with a mobile-first approach:
 
 ## 🔐 Security Features
 
-- **Session Management**: Secure PostgreSQL-backed sessions
+- **Session Management**: Secure MySQL-backed sessions
 - **Input Validation**: Zod schema validation on all inputs
 - **CSRF Protection**: Cross-site request forgery prevention
 - **XSS Prevention**: Content Security Policy implementation
@@ -273,7 +273,7 @@ When reporting issues, please include:
 ### Cloud Deployment Options
 - **Replit Deployments**: One-click deployment with automatic scaling
 - **Vercel**: Optimized for full-stack applications
-- **Railway**: Simple PostgreSQL integration
+- **Railway**: Simple MySQL integration
 - **Heroku**: Traditional platform-as-a-service deployment
 
 ## 📄 License

@@ -68,7 +68,7 @@ npm install
 **What you'll see**: Lots of text scrolling as packages are downloaded
 
 ### Step 6: Set Up Database (Optional - for basic testing)
-The app can run with in-memory storage for testing. For production use, you'll need a PostgreSQL database.
+The app can run with in-memory storage for testing. For production use, you'll need a MySQL database.
 
 **For Testing Only**: Skip this step - the app will use memory storage
 
@@ -76,7 +76,7 @@ The app can run with in-memory storage for testing. For production use, you'll n
 1. Create a `.env` file in the project root
 2. Add your database connection string:
 ```
-DATABASE_URL=your_postgresql_connection_string_here
+DATABASE_URL=your_mysql_connection_string_here
 ```
 
 ### Step 7: Start the Development Server
@@ -157,7 +157,7 @@ npm run build
 ```
 Creates an optimized production build
 
-### Database Commands (if using PostgreSQL)
+### Database Commands (if using MySQL)
 ```bash
 npm run db:generate    # Generate database migrations
 npm run db:push        # Apply changes to database
@@ -234,7 +234,7 @@ If you encounter issues not covered in this guide:
 - **Modern Browser**: Use Chrome, Firefox, Safari, or Edge (avoid Internet Explorer)
 - **Computer Performance**: The app uses moderate system resources
 - **File Changes**: Always save files (Ctrl+S) before testing changes
-- **Database**: For production use, set up a proper PostgreSQL database
+- **Database**: For production use, set up a proper MySQL database
 
 ## Quick Start Checklist
 
