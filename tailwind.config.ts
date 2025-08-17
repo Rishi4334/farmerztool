@@ -51,6 +51,14 @@ export default {
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
         },
+        farmer: {
+          green: "var(--farmer-green)",
+          "green-light": "var(--farmer-green-light)",
+          orange: "var(--farmer-orange)",
+          gray: "var(--farmer-gray)",
+          yellow: "var(--farmer-yellow)",
+          blue: "var(--farmer-blue)",
+        },
         sidebar: {
           DEFAULT: "var(--sidebar-background)",
           foreground: "var(--sidebar-foreground)",

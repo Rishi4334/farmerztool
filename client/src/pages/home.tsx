@@ -54,7 +54,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex-1 pb-20">
+    <div className="flex-1 pb-20 bg-background">
       {/* Weather Alert */}
       <WeatherAlert 
         alertType="rain"

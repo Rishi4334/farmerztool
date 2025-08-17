@@ -3,6 +3,7 @@ import { Bell, Languages, Sprout } from "lucide-react";
 import { useTranslation } from "@/hooks/use-language";
 import { useState } from "react";
 import { LanguageSelector } from "./language-selector";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Header() {
   const t = useTranslation();
@@ -17,6 +18,7 @@ export function Header() {
             <h1 className="text-xl font-bold">{t.appName}</h1>
           </div>
           <div className="flex items-center space-x-3">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"

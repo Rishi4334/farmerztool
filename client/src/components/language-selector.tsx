@@ -33,7 +33,7 @@ export function LanguageSelector({ isOpen, onClose }: LanguageSelectorProps) {
               className={`w-full justify-start text-left h-14 ${
                 currentLanguage === key 
                   ? 'bg-farmer-green text-white' 
-                  : 'bg-white text-farmer-green border border-farmer-green hover:bg-farmer-green hover:text-white'
+                  : 'bg-background text-farmer-green border border-farmer-green hover:bg-farmer-green hover:text-white'
               }`}
               variant={currentLanguage === key ? "default" : "outline"}
             >

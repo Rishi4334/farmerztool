@@ -14,10 +14,10 @@ export function WeatherAlert({ alertType, message, severity }: WeatherAlertProps
   const t = useTranslation();
 
   const severityColors = {
-    low: 'bg-blue-100 border-blue-500 text-blue-800',
-    medium: 'bg-yellow-100 border-yellow-500 text-yellow-800',
-    high: 'bg-orange-100 border-orange-500 text-orange-800',
-    critical: 'bg-red-100 border-red-500 text-red-800'
+    low: 'bg-blue-100 dark:bg-blue-900/20 border-blue-500 text-blue-800 dark:text-blue-200',
+    medium: 'bg-yellow-100 dark:bg-yellow-900/20 border-yellow-500 text-yellow-800 dark:text-yellow-200',
+    high: 'bg-orange-100 dark:bg-orange-900/20 border-orange-500 text-orange-800 dark:text-orange-200',
+    critical: 'bg-red-100 dark:bg-red-900/20 border-red-500 text-red-800 dark:text-red-200'
   };
 
   const handleListen = () => {

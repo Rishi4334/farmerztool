@@ -16,7 +16,7 @@ export function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 safe-area-pb">
       <div className="flex justify-around">
         {navItems.map(({ icon: Icon, label, path }) => (
           <Button
@@ -27,7 +27,7 @@ export function BottomNavigation() {
               "flex flex-col items-center space-y-1 touch-button px-2 py-3 h-auto",
               location === path 
                 ? "text-farmer-green" 
-                : "text-gray-400 hover:text-farmer-green"
+                : "text-muted-foreground hover:text-farmer-green"
             )}
           >
             <Icon className="h-5 w-5" />

@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/hooks/use-language";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { Header } from "@/components/header";
 import { VoiceAssistant } from "@/components/voice-assistant";
 import { BottomNavigation } from "@/components/bottom-navigation";
@@ -34,7 +35,7 @@ function Router() {
 
 function AppLayout() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
       <VoiceAssistant />
       <main className="flex-1">
@@ -49,11 +50,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <LanguageProvider>
-          <Toaster />
-          <InitialLanguageSelector />
-          <AppLayout />
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <Toaster />
+            <InitialLanguageSelector />
+            <AppLayout />
+          </LanguageProvider>
+        </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
