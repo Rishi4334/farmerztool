@@ -4,3 +4,12 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+# Ignore Replit-related files
+.local/
+.replit
+replit.md
+
+# Ignore extra markdown docs (keep only README.md)
+COMPLETE_CODE_REFERENCE.md
+RESEARCH_PAPER.md
+HOWTORUN.md
