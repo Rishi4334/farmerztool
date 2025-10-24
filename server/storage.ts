@@ -1,8 +1,18 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
+import * as schema from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import { type User, type InsertUser } from '@shared/schema';
 
-// modify the interface with any CRUD methods
-// you might need
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL must be set');
+}
+
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+export const db = drizzle(pool, { schema });
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -10,36 +20,25 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.query.users.findFirst({
+      where: eq(schema.users.id, id),
+    });
+    return result;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const result = await db.query.users.findFirst({
+      where: eq(schema.users.username, username),
+    });
+    return result;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      location: insertUser.location ?? null,
-      phone: insertUser.phone ?? null,
-      language: insertUser.language ?? null,
-      createdAt: new Date()
-    };
-    this.users.set(id, user);
+    const [user] = await db.insert(schema.users).values(insertUser).returning();
     return user;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

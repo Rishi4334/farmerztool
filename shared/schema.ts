@@ -1,10 +1,10 @@
 import { sql } from "drizzle-orm";
-import { mysqlTable, text, varchar, int, decimal, timestamp, boolean } from "drizzle-orm/mysql-core";
+import { pgTable, text, varchar, integer, numeric, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = mysqlTable("users", {
-  id: varchar("id", { length: 36 }).primaryKey().default(sql`(UUID())`),
+export const users = pgTable("users", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   phone: text("phone"),
@@ -13,50 +13,50 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const crops = mysqlTable("crops", {
-  id: varchar("id", { length: 36 }).primaryKey().default(sql`(UUID())`),
+export const crops = pgTable("crops", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   nameHindi: text("name_hindi"),
   nameTelugu: text("name_telugu"),
   category: text("category").notNull(),
-  currentPrice: decimal("current_price", { precision: 10, scale: 2 }),
+  currentPrice: numeric("current_price", { precision: 10, scale: 2 }),
   unit: text("unit").default("quintal"),
 });
 
-export const diseaseDetections = mysqlTable("disease_detections", {
-  id: varchar("id", { length: 36 }).primaryKey().default(sql`(UUID())`),
+export const diseaseDetections = pgTable("disease_detections", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   cropId: varchar("crop_id", { length: 36 }).references(() => crops.id),
   imageUrl: text("image_url").notNull(),
   detectedDisease: text("detected_disease"),
-  confidence: decimal("confidence", { precision: 5, scale: 2 }),
+  confidence: numeric("confidence", { precision: 5, scale: 2 }),
   treatment: text("treatment"),
   detectedAt: timestamp("detected_at").defaultNow(),
 });
 
-export const listings = mysqlTable("listings", {
-  id: varchar("id", { length: 36 }).primaryKey().default(sql`(UUID())`),
+export const listings = pgTable("listings", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id", { length: 36 }).references(() => users.id),
   cropId: varchar("crop_id", { length: 36 }).references(() => crops.id),
-  quantity: int("quantity").notNull(),
-  pricePerUnit: decimal("price_per_unit", { precision: 10, scale: 2 }).notNull(),
+  quantity: integer("quantity").notNull(),
+  pricePerUnit: numeric("price_per_unit", { precision: 10, scale: 2 }).notNull(),
   location: text("location").notNull(),
   description: text("description"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const marketPrices = mysqlTable("market_prices", {
-  id: varchar("id", { length: 36 }).primaryKey().default(sql`(UUID())`),
+export const marketPrices = pgTable("market_prices", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   cropId: varchar("crop_id", { length: 36 }).references(() => crops.id),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  priceChange: decimal("price_change", { precision: 10, scale: 2 }),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  priceChange: numeric("price_change", { precision: 10, scale: 2 }),
   market: text("market").notNull(),
   date: timestamp("date").defaultNow(),
 });
 
-export const weatherAlerts = mysqlTable("weather_alerts", {
-  id: varchar("id", { length: 36 }).primaryKey().default(sql`(UUID())`),
+export const weatherAlerts = pgTable("weather_alerts", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   location: text("location").notNull(),
   alertType: text("alert_type").notNull(),
   severity: text("severity").notNull(),
