@@ -241,6 +241,10 @@ export default function Profile() {
         <Button 
           variant="outline" 
           className="w-full border-red-500 text-red-500 hover:bg-red-50"
+          onClick={() => {
+            localStorage.removeItem("user");
+            window.location.href = "/login";
+          }}
         >
           <LogOut className="h-4 w-4 mr-2" />
           Logout

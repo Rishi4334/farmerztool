@@ -266,6 +266,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== DATABASE STATUS ====================
+  
+  app.get("/api/database/status", async (_req, res) => {
+    try {
+      const crops = await storage.getAllCrops();
+      const listings = await storage.getAllListings();
+      const prices = await storage.getMarketPrices();
+      
+      res.json({
+        connected: true,
+        collections: {
+          crops: crops.length,
+          listings: listings.length,
+          marketPrices: prices.length
+        },
+        message: 'MongoDB is connected and operational'
+      });
+    } catch (error) {
+      res.status(500).json({
+        connected: false,
+        message: 'Using in-memory storage',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // ==================== ANALYTICS ====================
   
   app.get("/api/analytics/:userId", async (req, res) => {

@@ -3,27 +3,70 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Plus, Eye, Edit } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function SellDirect() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     crop: "",
     quantity: "",
     location: "",
-    description: ""
+    description: "",
+    pricePerUnit: ""
   });
 
-  const crops = [
-    { value: "rice", label: "Rice" },
-    { value: "wheat", label: "Wheat" },
-    { value: "tomato", label: "Tomato" },
-    { value: "onion", label: "Onion" },
-    { value: "potato", label: "Potato" }
-  ];
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const { data: crops } = useQuery({
+    queryKey: ["/api/crops"],
+  });
+
+  const { data: userListings = [], refetch: refetchListings } = useQuery({
+    queryKey: ["/api/listings/user", user._id],
+    enabled: !!user._id,
+  });
+
+  const createListingMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create listing");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/listings"] });
+      refetchListings();
+      toast({
+        title: "Success!",
+        description: "Your listing has been created successfully.",
+      });
+      setFormData({
+        crop: "",
+        quantity: "",
+        location: "",
+        description: "",
+        pricePerUnit: ""
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create listing. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const activeListings = [
     {
@@ -56,8 +99,25 @@ export default function SellDirect() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Form submitted:", formData);
+    
+    if (!user._id) {
+      toast({
+        title: "Error",
+        description: "Please login to create a listing",
+        variant: "destructive",
+      });
+      setLocation("/login");
+      return;
+    }
+
+    createListingMutation.mutate({
+      userId: user._id,
+      cropId: formData.crop,
+      quantity: parseFloat(formData.quantity),
+      pricePerUnit: parseFloat(formData.pricePerUnit),
+      location: formData.location,
+      description: formData.description,
+    });
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -94,9 +154,9 @@ export default function SellDirect() {
                     <SelectValue placeholder="Select crop" />
                   </SelectTrigger>
                   <SelectContent>
-                    {crops.map((crop) => (
-                      <SelectItem key={crop.value} value={crop.value}>
-                        {crop.label}
+                    {crops?.map((crop: any) => (
+                      <SelectItem key={crop._id} value={crop._id}>
+                        {crop.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -112,6 +172,20 @@ export default function SellDirect() {
                   value={formData.quantity}
                   onChange={(e) => handleInputChange("quantity", e.target.value)}
                   className="mt-2"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="pricePerUnit" className="text-sm font-medium text-gray-700">Price per Quintal (₹)</Label>
+                <Input
+                  id="pricePerUnit"
+                  type="number"
+                  placeholder="Enter price"
+                  value={formData.pricePerUnit}
+                  onChange={(e) => handleInputChange("pricePerUnit", e.target.value)}
+                  className="mt-2"
+                  required
                 />
               </div>
 
@@ -123,6 +197,18 @@ export default function SellDirect() {
                   placeholder="Your village/district"
                   value={formData.location}
                   onChange={(e) => handleInputChange("location", e.target.value)}
+                  className="mt-2"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description" className="text-sm font-medium text-gray-700">Description (Optional)</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Additional details about your product"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange("description", e.target.value)}
                   className="mt-2"
                 />
               </div>
@@ -170,45 +256,38 @@ export default function SellDirect() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {activeListings.map((listing) => (
-                <div key={listing.id} className="border border-gray-200 rounded-lg p-4">
+              {userListings.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">No listings yet. Create your first listing above!</p>
+              ) : (
+                userListings.map((listing: any) => (
+                <div key={listing._id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <p className="font-medium">{listing.crop}</p>
+                      <p className="font-medium">{listing.description || "Product Listing"}</p>
                       <p className="text-sm text-gray-600">
                         {listing.quantity} quintals • {listing.location}
                       </p>
                     </div>
-                    <Badge variant={listing.status === "active" ? "default" : "secondary"}>
-                      {listing.status === "active" ? "Active" : "Sold"}
+                    <Badge variant={listing.isActive ? "default" : "secondary"}>
+                      {listing.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <p className="text-lg font-bold text-farmer-green">
-                      ₹{listing.price.toLocaleString()}/quintal
+                      ₹{listing.pricePerUnit.toLocaleString()}/quintal
                     </p>
                     <div className="flex items-center space-x-2">
-                      {listing.status === "active" && listing.inquiries > 0 && (
-                        <Button variant="outline" size="sm" className="text-blue-600 border-blue-600">
-                          <Eye className="mr-1 h-3 w-3" />
-                          {listing.inquiries} Inquiries
-                        </Button>
-                      )}
-                      {listing.status === "active" ? (
+                      {listing.isActive && (
                         <Button variant="outline" size="sm" className="text-farmer-orange border-farmer-orange">
                           <Edit className="mr-1 h-3 w-3" />
                           Edit
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="sm" className="text-green-600 border-green-600">
-                          ✓ Completed
                         </Button>
                       )}
                     </div>
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
 
             {/* Summary Stats */}

@@ -1,15 +1,28 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { ArrowLeft, TrendingUp, TrendingDown, Search, Volume2, Lightbulb, Clock } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useVoice } from "@/hooks/use-voice";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Market() {
   const [, setLocation] = useLocation();
   const { speak } = useVoice();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
 
-  const marketPrices = [
+  const { data: allCrops } = useQuery({
+    queryKey: ["/api/crops"],
+  });
+
+  const { data: marketPricesData } = useQuery({
+    queryKey: ["/api/market-prices"],
+  });
+
+  const marketPrices = marketPricesData || [
     {
       name: "Rice",
       price: 2450,
@@ -70,6 +83,10 @@ export default function Market() {
     speak("AI Price Prediction: Rice prices are expected to rise by 8% next week due to increased demand and reduced supply from neighboring states.");
   };
 
+  const filteredCrops = marketPrices.filter((crop) =>
+    crop.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -83,7 +100,26 @@ export default function Market() {
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-bold">Market Prices</h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowSearch(!showSearch)}
+          className="ml-auto text-white hover:bg-farmer-green-light"
+        >
+          <Search className="h-6 w-6" />
+        </Button>
       </header>
+
+      {showSearch && (
+        <div className="p-4 bg-farmer-green-light">
+          <Input
+            placeholder="Search crops..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-white text-farmer-green focus:ring-farmer-green"
+          />
+        </div>
+      )}
 
       <div className="p-4 pb-20">
         {/* AI Price Prediction Banner */}
@@ -116,7 +152,7 @@ export default function Market() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {marketPrices.map((crop, index) => (
+              {filteredCrops.map((crop, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
                     <div className="text-2xl mr-4">{crop.image}</div>
@@ -142,9 +178,9 @@ export default function Market() {
               ))}
             </div>
 
-            <Button className="w-full mt-4 bg-farmer-green text-white hover:bg-farmer-green-light">
+            <Button className="w-full mt-4 bg-farmer-green text-white hover:bg-farmer-green-light" onClick={() => setLocation("/sell-direct")}>
               <Search className="mr-2 h-4 w-4" />
-              Search More Crops
+              Sell Direct
             </Button>
           </CardContent>
         </Card>

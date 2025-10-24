@@ -10,6 +10,7 @@ import { VoiceAssistant } from "@/components/voice-assistant";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { InitialLanguageSelector } from "@/components/language-selector";
 import Home from "@/pages/home";
+import Login from "@/pages/login";
 import PlantDoctor from "@/pages/plant-doctor";
 import Weather from "@/pages/weather";
 import Market from "@/pages/market";
@@ -24,6 +25,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
+      <Route path="/login" component={Login} />
       <Route path="/" component={Home} />
       <Route path="/plant-doctor" component={PlantDoctor} />
       <Route path="/weather" component={Weather} />
