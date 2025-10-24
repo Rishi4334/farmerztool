@@ -32,9 +32,55 @@ export async function connectDB() {
     });
     isConnected = true;
     console.log('MongoDB connected successfully');
+    
+    // Seed initial data if collections are empty
+    await seedDatabase();
   } catch (error) {
     console.warn('MongoDB connection failed, using in-memory storage:', error instanceof Error ? error.message : 'Unknown error');
     console.warn('To fix: Whitelist Replit IP in MongoDB Atlas Network Access');
+  }
+}
+
+async function seedDatabase() {
+  try {
+    const cropCount = await Crop.countDocuments();
+    
+    if (cropCount === 0) {
+      console.log('Seeding database with initial data...');
+      
+      const sampleCrops = [
+        { name: 'Rice', nameHindi: 'चावल', nameTelugu: 'బియ్యం', category: 'Grain', currentPrice: 2400, unit: 'quintal' },
+        { name: 'Wheat', nameHindi: 'गेहूं', nameTelugu: 'గోధుమలు', category: 'Grain', currentPrice: 2100, unit: 'quintal' },
+        { name: 'Cotton', nameHindi: 'कपास', nameTelugu: 'పత్తి', category: 'Cash Crop', currentPrice: 5800, unit: 'quintal' },
+        { name: 'Tomato', nameHindi: 'टमाटर', nameTelugu: 'టమాటా', category: 'Vegetable', currentPrice: 1200, unit: 'quintal' },
+        { name: 'Potato', nameHindi: 'आलू', nameTelugu: 'బంగాళదుంప', category: 'Vegetable', currentPrice: 1800, unit: 'quintal' },
+        { name: 'Onion', nameHindi: 'प्याज', nameTelugu: 'ఉల్లిపాయ', category: 'Vegetable', currentPrice: 2200, unit: 'quintal' },
+        { name: 'Sugarcane', nameHindi: 'गन्ना', nameTelugu: 'చెరకు', category: 'Cash Crop', currentPrice: 3500, unit: 'ton' },
+        { name: 'Corn', nameHindi: 'मक्का', nameTelugu: 'మొక్కజొన్న', category: 'Grain', currentPrice: 1900, unit: 'quintal' }
+      ];
+      
+      await Crop.insertMany(sampleCrops);
+      console.log(`✓ Seeded ${sampleCrops.length} crops`);
+      
+      // Seed some market prices
+      const crops = await Crop.find().limit(4);
+      const marketPrices = crops.map(crop => ({
+        cropId: crop._id.toString(),
+        price: crop.currentPrice || 2000,
+        priceChange: Math.random() > 0.5 ? Math.random() * 100 : -Math.random() * 100,
+        market: 'Delhi Mandi',
+        date: new Date()
+      }));
+      
+      await MarketPrice.insertMany(marketPrices);
+      console.log(`✓ Seeded ${marketPrices.length} market prices`);
+      
+      console.log('Database seeding completed!');
+    } else {
+      console.log(`Database already has ${cropCount} crops, skipping seed.`);
+    }
+  } catch (error) {
+    console.error('Error seeding database:', error instanceof Error ? error.message : 'Unknown error');
   }
 }
 
