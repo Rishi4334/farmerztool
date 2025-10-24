@@ -16,6 +16,9 @@ import Market from "@/pages/market";
 import SellDirect from "@/pages/sell-direct";
 import KnowledgeHub from "@/pages/knowledge-hub";
 import ExpertConnect from "@/pages/expert-connect";
+import Analytics from "@/pages/analytics";
+import Alerts from "@/pages/alerts";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -28,6 +31,9 @@ function Router() {
       <Route path="/sell-direct" component={SellDirect} />
       <Route path="/knowledge-hub" component={KnowledgeHub} />
       <Route path="/expert-connect" component={ExpertConnect} />
+      <Route path="/analytics" component={Analytics} />
+      <Route path="/alerts" component={Alerts} />
+      <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );
