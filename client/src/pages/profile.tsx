@@ -12,7 +12,11 @@ import { useState } from "react";
 export default function Profile() {
   const t = useTranslation();
   const { currentLanguage, setLanguage } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme, actualTheme } = useTheme();
+  
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
   
   const [userData, setUserData] = useState({
     name: "Ramesh Kumar",
