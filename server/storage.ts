@@ -1,43 +1,48 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
-import pg from 'pg';
-import * as schema from '@shared/schema';
-import { eq } from 'drizzle-orm';
-import { type User, type InsertUser } from '@shared/schema';
+import mongoose from 'mongoose';
+import { User, type IUser, type InsertUser } from './models';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL must be set');
+if (!process.env.MONGODB_URI) {
+  throw new Error('MONGODB_URI must be set');
 }
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+let isConnected = false;
 
-export const db = drizzle(pool, { schema });
+export async function connectDB() {
+  if (isConnected) {
+    return;
+  }
+
+  try {
+    await mongoose.connect(process.env.MONGODB_URI!);
+    isConnected = true;
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
+}
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUser(id: string): Promise<IUser | null>;
+  getUserByUsername(username: string): Promise<IUser | null>;
+  createUser(user: InsertUser): Promise<IUser>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: string): Promise<User | undefined> {
-    const result = await db.query.users.findFirst({
-      where: eq(schema.users.id, id),
-    });
-    return result;
+  async getUser(id: string): Promise<IUser | null> {
+    await connectDB();
+    return User.findById(id).exec();
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await db.query.users.findFirst({
-      where: eq(schema.users.username, username),
-    });
-    return result;
+  async getUserByUsername(username: string): Promise<IUser | null> {
+    await connectDB();
+    return User.findOne({ username }).exec();
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(schema.users).values(insertUser).returning();
-    return user;
+  async createUser(insertUser: InsertUser): Promise<IUser> {
+    await connectDB();
+    const user = new User(insertUser);
+    return user.save();
   }
 }
 
