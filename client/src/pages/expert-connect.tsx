@@ -1,11 +1,22 @@
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, UserCheck, ShoppingCart, Building, Headphones, Phone, MessageCircle, Eye } from "lucide-react";
+import { ArrowLeft, UserCheck, ShoppingCart, Building, Headphones, Phone, MessageCircle, Eye, X, Send } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ExpertConnect() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [selectedExpert, setSelectedExpert] = useState<any>(null);
+  const [chatMode, setChatMode] = useState(false);
+  const [message, setMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
 
   const expertCategories = [
     {
@@ -43,7 +54,8 @@ export default function ExpertConnect() {
       languages: ["Telugu", "Hindi", "English"],
       rating: 4.8,
       isOnline: true,
-      responseTime: "< 5 min"
+      responseTime: "< 5 min",
+      phone: "+91-9876543210"
     },
     {
       id: 2,
@@ -53,7 +65,8 @@ export default function ExpertConnect() {
       languages: ["Hindi", "English"],
       rating: 4.9,
       isOnline: true,
-      responseTime: "< 10 min"
+      responseTime: "< 10 min",
+      phone: "+91-9876543211"
     },
     {
       id: 3,
@@ -63,7 +76,8 @@ export default function ExpertConnect() {
       languages: ["Hindi", "Gujarati", "English"],
       rating: 4.7,
       isOnline: false,
-      responseTime: "< 30 min"
+      responseTime: "< 30 min",
+      phone: "+91-9876543212"
     }
   ];
 
@@ -76,7 +90,8 @@ export default function ExpertConnect() {
       description: "Consulted about leaf spots on tomato plants",
       time: "2 hours ago",
       status: "solved",
-      color: "green"
+      color: "green",
+      solution: "Applied neem oil spray as recommended. Disease spreading has stopped and new growth looks healthy."
     },
     {
       id: 2,
@@ -86,7 +101,8 @@ export default function ExpertConnect() {
       description: "Connected with buyer offering ₹2,400/quintal",
       time: "Yesterday",
       status: "pending",
-      color: "blue"
+      color: "blue",
+      solution: "Waiting for buyer to confirm order quantity and delivery date."
     },
     {
       id: 3,
@@ -96,9 +112,63 @@ export default function ExpertConnect() {
       description: "Help with application renewal process",
       time: "3 days ago",
       status: "completed",
-      color: "purple"
+      color: "purple",
+      solution: "Application successfully submitted. Payment expected in next installment cycle."
     }
   ];
+
+  const [selectedConsultation, setSelectedConsultation] = useState<any>(null);
+
+  const handleCall = (expert: any) => {
+    if (!expert.isOnline) {
+      toast({
+        title: "Expert Offline",
+        description: `${expert.name} is currently offline. Please try chat or schedule a call.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSelectedExpert(expert);
+    toast({
+      title: "Calling...",
+      description: `Connecting you to ${expert.name} at ${expert.phone}`,
+    });
+  };
+
+  const handleChat = (expert: any) => {
+    setSelectedExpert(expert);
+    setChatMode(true);
+    setChatMessages([
+      {
+        sender: "expert",
+        text: `Hello! I'm ${expert.name}. How can I help you today?`,
+        time: new Date().toLocaleTimeString()
+      }
+    ]);
+  };
+
+  const handleSendMessage = () => {
+    if (!message.trim()) return;
+
+    const newMessage = {
+      sender: "user",
+      text: message,
+      time: new Date().toLocaleTimeString()
+    };
+
+    setChatMessages([...chatMessages, newMessage]);
+    setMessage("");
+
+    // Simulate expert response
+    setTimeout(() => {
+      setChatMessages(prev => [...prev, {
+        sender: "expert",
+        text: "Thank you for your question. Let me help you with that...",
+        time: new Date().toLocaleTimeString()
+      }]);
+    }, 1000);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -173,7 +243,7 @@ export default function ExpertConnect() {
                     <Button 
                       size="sm" 
                       className="bg-farmer-green text-white hover:bg-farmer-green-light"
-                      disabled={!expert.isOnline}
+                      onClick={() => handleCall(expert)}
                     >
                       <Phone className="mr-1 h-3 w-3" />
                       Call
@@ -182,6 +252,7 @@ export default function ExpertConnect() {
                       variant="outline" 
                       size="sm" 
                       className="border-farmer-green text-farmer-green hover:bg-farmer-green hover:text-white"
+                      onClick={() => handleChat(expert)}
                     >
                       <MessageCircle className="mr-1 h-3 w-3" />
                       Chat
@@ -232,6 +303,7 @@ export default function ExpertConnect() {
                           consultation.color === 'blue' ? 'text-blue-700 hover:text-blue-800' :
                           'text-purple-700 hover:text-purple-800'
                         }`}
+                        onClick={() => setSelectedConsultation(consultation)}
                       >
                         <Eye className="mr-1 h-3 w-3" />
                         {consultation.status === 'solved' ? 'View Solution' : 'View Details'}
@@ -244,11 +316,19 @@ export default function ExpertConnect() {
 
             {/* Quick Actions */}
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <Button variant="outline" className="border-farmer-green text-farmer-green hover:bg-farmer-green hover:text-white">
+              <Button 
+                variant="outline" 
+                className="border-farmer-green text-farmer-green hover:bg-farmer-green hover:text-white"
+                onClick={() => toast({ title: "Emergency Help", description: "Connecting you to emergency support..." })}
+              >
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Emergency Help
               </Button>
-              <Button variant="outline" className="border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white">
+              <Button 
+                variant="outline" 
+                className="border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white"
+                onClick={() => toast({ title: "Schedule Call", description: "Opening scheduler..." })}
+              >
                 <Phone className="mr-2 h-4 w-4" />
                 Schedule Call
               </Button>
@@ -256,6 +336,94 @@ export default function ExpertConnect() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Chat Dialog */}
+      <Dialog open={chatMode} onOpenChange={() => { setChatMode(false); setSelectedExpert(null); }}>
+        <DialogContent className="max-w-md h-[600px] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-farmer-green">
+              Chat with {selectedExpert?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto space-y-3 p-4">
+            {chatMessages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[70%] rounded-lg p-3 ${
+                  msg.sender === 'user' ? 'bg-farmer-green text-white' : 'bg-gray-100'
+                }`}>
+                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-xs opacity-70 mt-1">{msg.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 p-4 border-t">
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type your message..."
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            />
+            <Button onClick={handleSendMessage} className="bg-farmer-green">
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Consultation Details Dialog */}
+      <Dialog open={!!selectedConsultation} onOpenChange={() => setSelectedConsultation(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-farmer-green">{selectedConsultation?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Expert</p>
+              <p className="text-gray-800">{selectedConsultation?.expert}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Description</p>
+              <p className="text-gray-800">{selectedConsultation?.description}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Status</p>
+              <Badge variant={selectedConsultation?.status === 'solved' ? 'default' : 'secondary'}>
+                {selectedConsultation?.status}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Solution/Details</p>
+              <p className="text-gray-800">{selectedConsultation?.solution}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Call Dialog */}
+      <Dialog open={!!selectedExpert && !chatMode} onOpenChange={() => setSelectedExpert(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-farmer-green">Calling {selectedExpert?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-8">
+            <div className="w-20 h-20 bg-farmer-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Phone className="h-10 w-10 text-farmer-green animate-pulse" />
+            </div>
+            <p className="text-lg font-medium mb-2">{selectedExpert?.specialty}</p>
+            <p className="text-gray-600 mb-4">{selectedExpert?.phone}</p>
+            <p className="text-sm text-gray-500">
+              In a production environment, this would initiate a real call or video consultation.
+            </p>
+            <Button 
+              className="mt-6 bg-red-500 hover:bg-red-600"
+              onClick={() => setSelectedExpert(null)}
+            >
+              End Call
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

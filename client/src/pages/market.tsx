@@ -14,15 +14,26 @@ export default function Market() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearch, setShowSearch] = useState(false);
 
-  const { data: allCrops } = useQuery({
+  const { data: allCrops = [] } = useQuery({
     queryKey: ["/api/crops"],
   });
 
-  const { data: marketPricesData } = useQuery({
+  const { data: marketPricesData = [] } = useQuery({
     queryKey: ["/api/market-prices"],
   });
 
-  
+  const marketPrices = marketPricesData.map((price: any) => {
+    const crop = allCrops.find((c: any) => c._id === price.cropId);
+    return {
+      ...price,
+      crop: crop?.name || "Unknown",
+      priceChange: price.priceChange || 0
+    };
+  });
+
+  const filteredPrices = marketPrices.filter((price: any) => 
+    price.crop && price.crop.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const insights = [
     {
@@ -41,32 +52,10 @@ export default function Market() {
     }
   ];
 
-  const handleListenUpdate = () => {
-    const updateText = `Market update: Rice prices up 2.1% to ₹2,450 per quintal. Tomato prices surged 4.9% to ₹3,200. Wheat declined 0.9% to ₹2,180. Recommendation: Sell tomatoes now due to high demand, hold rice for better prices next week.`;
-    speak(updateText);
+  const handleListenPrice = (price: any) => {
+    const change = price.priceChange > 0 ? `up ${price.priceChange}` : `down ${Math.abs(price.priceChange)}`;
+    speak(`${price.crop} is currently at ${price.price} rupees per quintal, ${change} percent`);
   };
-
-  const handleListenPrediction = () => {
-    speak("AI Price Prediction: Rice prices are expected to rise by 8% next week due to increased demand and reduced supply from neighboring states.");
-  };
-
-  // Combine crops data with market prices
-  const cropsWithPrices = (allCrops || []).map((crop: any) => {
-    const marketPrice = (marketPricesData || []).find((mp: any) => mp.cropId === crop._id);
-    return {
-      _id: crop._id,
-      name: crop.name,
-      price: marketPrice?.price || crop.currentPrice || 2000,
-      change: marketPrice?.priceChange || 0,
-      changePercent: marketPrice?.priceChange ? ((marketPrice.priceChange / marketPrice.price) * 100).toFixed(1) : 0,
-      trend: (marketPrice?.priceChange || 0) > 0 ? "up" : "down",
-      image: crop.category === 'Grain' ? "🌾" : crop.category === 'Vegetable' ? "🥬" : "🌱"
-    };
-  });
-
-  const filteredCrops = cropsWithPrices.filter((crop) =>
-    crop.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,150 +70,112 @@ export default function Market() {
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-bold">Market Prices</h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowSearch(!showSearch)}
-          className="ml-auto text-white hover:bg-farmer-green-light"
-        >
-          <Search className="h-6 w-6" />
-        </Button>
       </header>
 
-      {showSearch && (
-        <div className="p-4 bg-farmer-green-light">
-          <Input
-            placeholder="Search crops..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white text-farmer-green focus:ring-farmer-green"
-          />
-        </div>
-      )}
-
       <div className="p-4 pb-20">
-        {/* AI Price Prediction Banner */}
-        <Card className="bg-gradient-to-r from-farmer-orange to-yellow-500 text-white mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <TrendingUp className="h-8 w-8 mr-4" />
-                <div>
-                  <h3 className="font-bold text-lg">AI Price Prediction</h3>
-                  <p className="opacity-90">Rice prices expected to rise 8% next week</p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleListenPrediction}
-                className="text-white hover:bg-white/20"
-              >
-                <Volume2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Search Bar */}
+        {showSearch && (
+          <div className="mb-4">
+            <Input
+              type="text"
+              placeholder="Search crops..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+            />
+          </div>
+        )}
 
-        {/* Current Market Prices */}
+        {/* AI-Powered Insights */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-farmer-green">Today's Prices</CardTitle>
+            <CardTitle className="text-farmer-green flex items-center">
+              <Lightbulb className="mr-2 h-5 w-5" />
+              AI Market Insights
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {filteredCrops.map((crop, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="text-2xl mr-4">{crop.image}</div>
+            <div className="space-y-3">
+              {insights.map((insight, index) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-lg ${
+                    insight.color === 'blue' ? 'bg-blue-50 border-l-4 border-blue-500' :
+                    'bg-yellow-50 border-l-4 border-yellow-500'
+                  }`}
+                >
+                  <div className="flex items-start">
+                    <insight.icon className={`h-5 w-5 mr-2 ${
+                      insight.color === 'blue' ? 'text-blue-600' : 'text-yellow-600'
+                    }`} />
                     <div>
-                      <p className="font-medium">{crop.name}</p>
-                      <p className="text-sm text-gray-600">Per quintal</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-lg">₹{crop.price.toLocaleString()}</p>
-                    <div className="flex items-center">
-                      {crop.trend === "up" ? (
-                        <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 text-red-600 mr-1" />
-                      )}
-                      <p className={`text-sm ${crop.trend === "up" ? "text-green-600" : "text-red-600"}`}>
-                        {crop.change > 0 ? "+" : ""}{crop.change} ({crop.changePercent > 0 ? "+" : ""}{crop.changePercent}%)
-                      </p>
+                      <p className="font-medium text-sm">{insight.crop}</p>
+                      <p className="text-xs text-gray-700">{insight.message}</p>
                     </div>
                   </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Today's Prices */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-farmer-green">Today's Prices</CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSearch(!showSearch)}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {filteredPrices.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">No market prices available</p>
+              ) : (
+                filteredPrices.map((price: any) => (
+                  <div key={price._id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                    <div className="flex-1">
+                      <p className="font-medium">{price.crop}</p>
+                      <p className="text-sm text-gray-600">{price.market}</p>
+                    </div>
+                    <div className="text-right mr-4">
+                      <p className="text-lg font-bold text-farmer-green">
+                        ₹{price.price.toLocaleString()}/quintal
+                      </p>
+                      <div className="flex items-center justify-end">
+                        {price.priceChange > 0 ? (
+                          <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+                        ) : (
+                          <TrendingDown className="h-4 w-4 text-red-600 mr-1" />
+                        )}
+                        <span className={`text-sm ${price.priceChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {Math.abs(price.priceChange)}%
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleListenPrice(price)}
+                      className="text-farmer-green"
+                    >
+                      <Volume2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
             </div>
 
             <Button className="w-full mt-4 bg-farmer-green text-white hover:bg-farmer-green-light" onClick={() => setLocation("/sell-direct")}>
               <Search className="mr-2 h-4 w-4" />
               Sell Direct
             </Button>
-          </CardContent>
-        </Card>
-
-        {/* Market Insights */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-farmer-green">Market Insights</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleListenUpdate}
-              className="border-farmer-green text-farmer-green hover:bg-farmer-green hover:text-white"
-            >
-              <Volume2 className="h-4 w-4 mr-2" />
-              Listen
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {insights.map((insight, index) => (
-                <div key={index} className={`p-4 rounded-lg ${
-                  insight.color === 'blue' ? 'bg-blue-50' : 'bg-yellow-50'
-                }`}>
-                  <div className="flex items-start">
-                    <insight.icon className={`h-5 w-5 mt-1 mr-3 ${
-                      insight.color === 'blue' ? 'text-blue-500' : 'text-yellow-500'
-                    }`} />
-                    <div>
-                      <div className="flex items-center mb-1">
-                        <p className={`font-medium ${
-                          insight.color === 'blue' ? 'text-blue-800' : 'text-yellow-800'
-                        }`}>
-                          {insight.type === 'sell' ? 'Best Selling Time' : 'Wait Strategy'}
-                        </p>
-                        <Badge variant="outline" className="ml-2">
-                          {insight.crop}
-                        </Badge>
-                      </div>
-                      <p className={`text-sm ${
-                        insight.color === 'blue' ? 'text-blue-700' : 'text-yellow-700'
-                      }`}>
-                        {insight.message}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {/* Additional Market Trends */}
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="p-3 bg-green-50 rounded-lg text-center">
-                  <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-green-800">Rising Demand</p>
-                  <p className="text-xs text-green-600">Vegetables</p>
-                </div>
-                <div className="p-3 bg-red-50 rounded-lg text-center">
-                  <TrendingDown className="h-6 w-6 text-red-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-red-800">Oversupply</p>
-                  <p className="text-xs text-red-600">Cereals</p>
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
