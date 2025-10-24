@@ -22,40 +22,7 @@ export default function Market() {
     queryKey: ["/api/market-prices"],
   });
 
-  const marketPrices = marketPricesData || [
-    {
-      name: "Rice",
-      price: 2450,
-      change: 50,
-      changePercent: 2.1,
-      trend: "up",
-      image: "🌾"
-    },
-    {
-      name: "Wheat",
-      price: 2180,
-      change: -20,
-      changePercent: -0.9,
-      trend: "down",
-      image: "🌾"
-    },
-    {
-      name: "Tomato",
-      price: 3200,
-      change: 150,
-      changePercent: 4.9,
-      trend: "up",
-      image: "🍅"
-    },
-    {
-      name: "Onion",
-      price: 2800,
-      change: -80,
-      changePercent: -2.8,
-      trend: "down",
-      image: "🧅"
-    }
-  ];
+  
 
   const insights = [
     {
@@ -83,7 +50,21 @@ export default function Market() {
     speak("AI Price Prediction: Rice prices are expected to rise by 8% next week due to increased demand and reduced supply from neighboring states.");
   };
 
-  const filteredCrops = marketPrices.filter((crop) =>
+  // Combine crops data with market prices
+  const cropsWithPrices = (allCrops || []).map((crop: any) => {
+    const marketPrice = (marketPricesData || []).find((mp: any) => mp.cropId === crop._id);
+    return {
+      _id: crop._id,
+      name: crop.name,
+      price: marketPrice?.price || crop.currentPrice || 2000,
+      change: marketPrice?.priceChange || 0,
+      changePercent: marketPrice?.priceChange ? ((marketPrice.priceChange / marketPrice.price) * 100).toFixed(1) : 0,
+      trend: (marketPrice?.priceChange || 0) > 0 ? "up" : "down",
+      image: crop.category === 'Grain' ? "🌾" : crop.category === 'Vegetable' ? "🥬" : "🌱"
+    };
+  });
+
+  const filteredCrops = cropsWithPrices.filter((crop) =>
     crop.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

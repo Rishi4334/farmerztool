@@ -23,15 +23,24 @@ export default function SellDirect() {
     pricePerUnit: ""
   });
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const getUserFromStorage = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      return userStr ? JSON.parse(userStr) : null;
+    } catch {
+      return null;
+    }
+  };
+  
+  const user = getUserFromStorage();
 
   const { data: crops } = useQuery({
     queryKey: ["/api/crops"],
   });
 
   const { data: userListings = [], refetch: refetchListings } = useQuery({
-    queryKey: ["/api/listings/user", user._id],
-    enabled: !!user._id,
+    queryKey: ["/api/listings/user", user?._id],
+    enabled: !!user?._id,
   });
 
   const createListingMutation = useMutation({
@@ -100,7 +109,8 @@ export default function SellDirect() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user._id) {
+    const currentUser = getUserFromStorage();
+    if (!currentUser || !currentUser._id) {
       toast({
         title: "Error",
         description: "Please login to create a listing",
@@ -111,7 +121,7 @@ export default function SellDirect() {
     }
 
     createListingMutation.mutate({
-      userId: user._id,
+      userId: currentUser._id,
       cropId: formData.crop,
       quantity: parseFloat(formData.quantity),
       pricePerUnit: parseFloat(formData.pricePerUnit),

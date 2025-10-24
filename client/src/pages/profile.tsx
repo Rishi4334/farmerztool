@@ -8,20 +8,52 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { LANGUAGES, type Language } from "@/lib/constants";
 import { useState } from "react";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function Profile() {
   const t = useTranslation();
   const { currentLanguage, setLanguage } = useLanguage();
   const { theme, setTheme, actualTheme } = useTheme();
-  
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
-  
+
+  const getUserFromStorage = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      return userStr ? JSON.parse(userStr) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const storedUser = getUserFromStorage();
+  const user = storedUser || {
+    username: "Guest User",
+    phone: "Not available",
+    location: "Not set",
+    language: "English"
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account."
+    });
+    setLocation("/login");
+  };
+
   const [userData, setUserData] = useState({
-    name: "Ramesh Kumar",
-    phone: "+91 98765 43210",
-    location: "Guntur, Andhra Pradesh",
+    name: user.username,
+    phone: user.phone,
+    location: user.location,
     farmSize: "5.5 acres",
     mainCrop: "Rice & Cotton"
   });
@@ -241,10 +273,7 @@ export default function Profile() {
         <Button 
           variant="outline" 
           className="w-full border-red-500 text-red-500 hover:bg-red-50"
-          onClick={() => {
-            localStorage.removeItem("user");
-            window.location.href = "/login";
-          }}
+          onClick={handleLogout}
         >
           <LogOut className="h-4 w-4 mr-2" />
           Logout
