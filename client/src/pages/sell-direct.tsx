@@ -23,15 +23,12 @@ export default function SellDirect() {
     pricePerUnit: ""
   });
 
-  const [user, setUser] = useState<any>(null);
-
-  useState(() => {
+  const [user, setUser] = useState<any>(() => {
     try {
       const userStr = localStorage.getItem("user");
-      const userData = userStr ? JSON.parse(userStr) : null;
-      setUser(userData);
+      return userStr ? JSON.parse(userStr) : null;
     } catch {
-      setUser(null);
+      return null;
     }
   });
 

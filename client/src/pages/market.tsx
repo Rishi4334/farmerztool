@@ -26,7 +26,7 @@ export default function Market() {
     const crop = allCrops.find((c: any) => c._id === price.cropId);
     return {
       ...price,
-      crop: crop?.name || "Unknown",
+      crop: crop?.name || "Unknown", // Added null check for crop name
       priceChange: price.priceChange || 0
     };
   });
