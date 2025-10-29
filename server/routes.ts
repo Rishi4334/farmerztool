@@ -103,10 +103,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/listings", async (req, res) => {
     try {
-      const listing = await storage.createListing(req.body as InsertListing);
+      const { userId, cropId, quantity, pricePerUnit, location, description } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ message: "User ID is required" });
+      }
+
+      if (!quantity || !pricePerUnit || !location) {
+        return res.status(400).json({ message: "Quantity, price, and location are required" });
+      }
+
+      const listingData: InsertListing = {
+        userId,
+        cropId: cropId || null,
+        quantity: parseFloat(quantity),
+        pricePerUnit: parseFloat(pricePerUnit),
+        location,
+        description: description || null
+      };
+
+      const listing = await storage.createListing(listingData);
+      
+      if (!listing) {
+        throw new Error("Failed to create listing in database");
+      }
+
+      console.log("Listing created successfully:", listing);
       res.status(201).json(listing);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create listing" });
+      console.error("Listing creation error:", error);
+      res.status(500).json({ 
+        message: "Failed to create listing",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
@@ -220,19 +249,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { username, password } = req.body as InsertUser;
+      const { username, password, phone, location, language } = req.body;
       
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+
       const existing = await storage.getUserByUsername(username);
       if (existing) {
         return res.status(400).json({ message: "Username already exists" });
       }
 
-      const user = await storage.createUser(req.body as InsertUser);
+      const userData: InsertUser = {
+        username,
+        password,
+        phone: phone || null,
+        location: location || null,
+        language: language || 'english'
+      };
+
+      const user = await storage.createUser(userData);
       
+      if (!user) {
+        throw new Error("Failed to create user in database");
+      }
+
       const { password: _, ...userWithoutPassword } = user as any;
+      console.log("User created successfully:", userWithoutPassword);
       res.status(201).json(userWithoutPassword);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create user" });
+      console.error("Registration error:", error);
+      res.status(500).json({ 
+        message: "Failed to create user",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

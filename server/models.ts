@@ -59,10 +59,10 @@ export interface IWeatherAlert extends Document {
 }
 
 const UserSchema = new Schema<IUser>({
-  username: { type: String, required: true, unique: true },
+  username: { type: String, required: true, unique: true, trim: true },
   password: { type: String, required: true },
-  phone: { type: String },
-  location: { type: String },
+  phone: { type: String, default: null },
+  location: { type: String, default: null },
   language: { type: String, default: 'english' },
   createdAt: { type: Date, default: Date.now },
 });
@@ -87,12 +87,12 @@ const DiseaseDetectionSchema = new Schema<IDiseaseDetection>({
 });
 
 const ListingSchema = new Schema<IListing>({
-  userId: { type: String, required: true },
-  cropId: { type: String },
-  quantity: { type: Number, required: true },
-  pricePerUnit: { type: Number, required: true },
-  location: { type: String, required: true },
-  description: { type: String },
+  userId: { type: String, required: true, index: true },
+  cropId: { type: String, default: null },
+  quantity: { type: Number, required: true, min: 0 },
+  pricePerUnit: { type: Number, required: true, min: 0 },
+  location: { type: String, required: true, trim: true },
+  description: { type: String, default: null },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
 });

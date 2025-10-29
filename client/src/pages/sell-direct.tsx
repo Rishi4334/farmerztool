@@ -104,7 +104,7 @@ export default function SellDirect() {
     netPrice: 2201
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user || !user._id) {
@@ -117,11 +117,20 @@ export default function SellDirect() {
       return;
     }
 
+    if (!formData.crop || !formData.quantity || !formData.pricePerUnit || !formData.location) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
     createListingMutation.mutate({
       userId: user._id,
       cropId: formData.crop,
-      quantity: parseFloat(formData.quantity),
-      pricePerUnit: parseFloat(formData.pricePerUnit),
+      quantity: formData.quantity,
+      pricePerUnit: formData.pricePerUnit,
       location: formData.location,
       description: formData.description,
     });

@@ -164,8 +164,17 @@ class InMemoryStorage implements IStorageInterface {
 
   async createUser(insertUser: InsertUser): Promise<IUser> {
     const id = String(this.idCounter++);
-    const user = { _id: id, ...insertUser, createdAt: new Date() } as IUser;
+    const user = { 
+      _id: id, 
+      username: insertUser.username,
+      password: insertUser.password,
+      phone: insertUser.phone || null,
+      location: insertUser.location || null,
+      language: insertUser.language || 'english',
+      createdAt: new Date() 
+    } as IUser;
     this.users.set(id, user);
+    console.log('User created in memory storage:', user._id);
     return user;
   }
 
@@ -205,8 +214,19 @@ class InMemoryStorage implements IStorageInterface {
 
   async createListing(listing: InsertListing): Promise<IListing> {
     const id = String(this.idCounter++);
-    const newListing = { _id: id, ...listing, isActive: true, createdAt: new Date() } as IListing;
+    const newListing = { 
+      _id: id, 
+      userId: listing.userId,
+      cropId: listing.cropId || null,
+      quantity: listing.quantity,
+      pricePerUnit: listing.pricePerUnit,
+      location: listing.location,
+      description: listing.description || null,
+      isActive: true, 
+      createdAt: new Date() 
+    } as IListing;
     this.listings.set(id, newListing);
+    console.log('Listing created in memory storage:', newListing._id);
     return newListing;
   }
 
@@ -261,8 +281,22 @@ class DatabaseStorage implements IStorageInterface {
 
   async createUser(insertUser: InsertUser): Promise<IUser> {
     if (!isConnected) throw new Error('Database not connected');
-    const user = new User(insertUser);
-    return user.save();
+    try {
+      const user = new User({
+        username: insertUser.username,
+        password: insertUser.password,
+        phone: insertUser.phone || undefined,
+        location: insertUser.location || undefined,
+        language: insertUser.language || 'english',
+        createdAt: new Date()
+      });
+      const savedUser = await user.save();
+      console.log('User saved to MongoDB:', savedUser._id);
+      return savedUser;
+    } catch (error) {
+      console.error('Error saving user to MongoDB:', error);
+      throw error;
+    }
   }
 
   async getAllCrops(): Promise<ICrop[]> {
@@ -283,8 +317,23 @@ class DatabaseStorage implements IStorageInterface {
 
   async createDiseaseDetection(detection: InsertDiseaseDetection): Promise<IDiseaseDetection> {
     if (!isConnected) throw new Error('Database not connected');
-    const newDetection = new DiseaseDetection(detection);
-    return newDetection.save();
+    try {
+      const newDetection = new DiseaseDetection({
+        userId: detection.userId,
+        cropId: detection.cropId || undefined,
+        imageUrl: detection.imageUrl,
+        detectedDisease: detection.detectedDisease || undefined,
+        confidence: detection.confidence || undefined,
+        treatment: detection.treatment || undefined,
+        detectedAt: new Date()
+      });
+      const savedDetection = await newDetection.save();
+      console.log('Disease detection saved to MongoDB:', savedDetection._id);
+      return savedDetection;
+    } catch (error) {
+      console.error('Error saving disease detection to MongoDB:', error);
+      throw error;
+    }
   }
 
   async getUserDiseaseDetections(userId: string): Promise<IDiseaseDetection[]> {
@@ -304,8 +353,24 @@ class DatabaseStorage implements IStorageInterface {
 
   async createListing(listing: InsertListing): Promise<IListing> {
     if (!isConnected) throw new Error('Database not connected');
-    const newListing = new Listing(listing);
-    return newListing.save();
+    try {
+      const newListing = new Listing({
+        userId: listing.userId,
+        cropId: listing.cropId || undefined,
+        quantity: listing.quantity,
+        pricePerUnit: listing.pricePerUnit,
+        location: listing.location,
+        description: listing.description || undefined,
+        isActive: true,
+        createdAt: new Date()
+      });
+      const savedListing = await newListing.save();
+      console.log('Listing saved to MongoDB:', savedListing._id);
+      return savedListing;
+    } catch (error) {
+      console.error('Error saving listing to MongoDB:', error);
+      throw error;
+    }
   }
 
   async updateListing(id: string, update: Partial<IListing>): Promise<IListing | null> {

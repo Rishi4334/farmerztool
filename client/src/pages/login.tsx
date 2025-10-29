@@ -37,14 +37,21 @@ export default function Login() {
         throw new Error(data.message || "Authentication failed");
       }
 
+      // Ensure we have valid user data before saving
+      if (!data._id || !data.username) {
+        throw new Error("Invalid user data received");
+      }
+
       localStorage.setItem("user", JSON.stringify(data));
+      console.log("User saved to localStorage:", data);
       
       toast({
         title: isLogin ? "Login successful!" : "Registration successful!",
         description: `Welcome ${data.username}!`
       });
       
-      setLocation("/");
+      // Small delay to ensure localStorage is written
+      setTimeout(() => setLocation("/"), 100);
     } catch (error) {
       toast({
         title: "Error",
