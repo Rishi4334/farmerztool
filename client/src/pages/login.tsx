@@ -42,8 +42,17 @@ export default function Login() {
         throw new Error("Invalid user data received");
       }
 
-      localStorage.setItem("user", JSON.stringify(data));
-      console.log("User saved to localStorage:", data);
+      // Clean user data object
+      const cleanUserData = {
+        _id: data._id,
+        username: data.username,
+        phone: data.phone || null,
+        location: data.location || null,
+        language: data.language || 'english'
+      };
+
+      localStorage.setItem("user", JSON.stringify(cleanUserData));
+      console.log("User saved to localStorage:", cleanUserData);
       
       toast({
         title: isLogin ? "Login successful!" : "Registration successful!",

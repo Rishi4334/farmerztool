@@ -274,9 +274,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Failed to create user in database");
       }
 
-      const { password: _, ...userWithoutPassword } = user as any;
-      console.log("User created successfully:", userWithoutPassword);
-      res.status(201).json(userWithoutPassword);
+      // Convert Mongoose document to plain object
+      const userObj = user.toObject ? user.toObject() : user;
+      const { password: _, ...userWithoutPassword } = userObj as any;
+      
+      // Return clean JSON object
+      const cleanUser = {
+        _id: userWithoutPassword._id.toString(),
+        username: userWithoutPassword.username,
+        phone: userWithoutPassword.phone || null,
+        location: userWithoutPassword.location || null,
+        language: userWithoutPassword.language || 'english'
+      };
+      
+      console.log("User created successfully:", cleanUser);
+      res.status(201).json(cleanUser);
     } catch (error) {
       console.error("Registration error:", error);
       res.status(500).json({ 
@@ -295,8 +307,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      const { password: _, ...userWithoutPassword } = user as any;
-      res.json(userWithoutPassword);
+      // Convert Mongoose document to plain object
+      const userObj = user.toObject ? user.toObject() : user;
+      const { password: _, ...userWithoutPassword } = userObj as any;
+      
+      // Return clean JSON object
+      const cleanUser = {
+        _id: userWithoutPassword._id.toString(),
+        username: userWithoutPassword.username,
+        phone: userWithoutPassword.phone || null,
+        location: userWithoutPassword.location || null,
+        language: userWithoutPassword.language || 'english'
+      };
+      
+      res.json(cleanUser);
     } catch (error) {
       res.status(500).json({ message: "Login failed" });
     }
