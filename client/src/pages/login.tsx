@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,7 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
       const response = await fetch(endpoint, {
@@ -53,12 +52,12 @@ export default function Login() {
 
       localStorage.setItem("user", JSON.stringify(cleanUserData));
       console.log("User saved to localStorage:", cleanUserData);
-      
+
       toast({
         title: isLogin ? "Login successful!" : "Registration successful!",
         description: `Welcome ${data.username}!`
       });
-      
+
       // Redirect to home page
       window.location.href = "/";
     } catch (error) {

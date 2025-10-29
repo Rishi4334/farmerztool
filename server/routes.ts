@@ -5,7 +5,7 @@ import type { InsertUser, InsertCrop, InsertDiseaseDetection, InsertListing, Ins
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== CROPS ====================
-  
+
   app.get("/api/crops", async (_req, res) => {
     try {
       const crops = await storage.getAllCrops();
@@ -37,11 +37,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== DISEASE DETECTION ====================
-  
+
   app.post("/api/disease-detection", async (req, res) => {
     try {
       const data = req.body as InsertDiseaseDetection;
-      
+
       const diseases = {
         'tomato': ['Early Blight', 'Late Blight', 'Leaf Mold', 'Septoria Leaf Spot'],
         'rice': ['Blast', 'Brown Spot', 'Bacterial Blight', 'Sheath Blight'],
@@ -82,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== LISTINGS (SELL DIRECT) ====================
-  
+
   app.get("/api/listings", async (_req, res) => {
     try {
       const listings = await storage.getAllListings();
@@ -123,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const listing = await storage.createListing(listingData);
-      
+
       if (!listing) {
         throw new Error("Failed to create listing in database");
       }
@@ -152,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== MARKET PRICES ====================
-  
+
   app.get("/api/market-prices", async (_req, res) => {
     try {
       const prices = await storage.getMarketPrices();
@@ -181,11 +181,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== WEATHER ALERTS ====================
-  
+
   app.get("/api/weather-alerts/:location", async (req, res) => {
     try {
       const alerts = await storage.getActiveWeatherAlerts(req.params.location);
-      
+
       if (alerts.length === 0) {
         const sampleAlerts = [
           {
@@ -217,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== WEATHER FORECAST ====================
-  
+
   app.get("/api/weather/forecast/:location", async (req, res) => {
     try {
       const forecast = {
@@ -238,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           icon: ['☀️', '☁️', '🌧️', '⛅'][Math.floor(Math.random() * 4)]
         }))
       };
-      
+
       res.json(forecast);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch weather forecast" });
@@ -246,11 +246,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== USERS / AUTH ====================
-  
+
   app.post("/api/auth/register", async (req, res) => {
     try {
       const { username, password, phone, location, language } = req.body;
-      
+
       if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required" });
       }
@@ -269,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const user = await storage.createUser(userData);
-      
+
       if (!user) {
         throw new Error("Failed to create user in database");
       }
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert Mongoose document to plain object
       const userObj = user.toObject ? user.toObject() : user;
       const { password: _, ...userWithoutPassword } = userObj as any;
-      
+
       // Return clean JSON object
       const cleanUser = {
         _id: userWithoutPassword._id.toString(),
@@ -286,7 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         location: userWithoutPassword.location || null,
         language: userWithoutPassword.language || 'english'
       };
-      
+
       console.log("User created successfully:", cleanUser);
       res.status(201).json(cleanUser);
     } catch (error) {
@@ -301,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { username, password } = req.body;
-      
+
       const user = await storage.getUserByUsername(username);
       if (!user || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
@@ -310,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert Mongoose document to plain object
       const userObj = user.toObject ? user.toObject() : user;
       const { password: _, ...userWithoutPassword } = userObj as any;
-      
+
       // Return clean JSON object
       const cleanUser = {
         _id: userWithoutPassword._id.toString(),
@@ -319,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         location: userWithoutPassword.location || null,
         language: userWithoutPassword.language || 'english'
       };
-      
+
       res.json(cleanUser);
     } catch (error) {
       res.status(500).json({ message: "Login failed" });
@@ -332,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       const { password: _, ...userWithoutPassword } = user as any;
       res.json(userWithoutPassword);
     } catch (error) {
@@ -341,13 +341,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== DATABASE STATUS ====================
-  
+
   app.get("/api/database/status", async (_req, res) => {
     try {
       const crops = await storage.getAllCrops();
       const listings = await storage.getAllListings();
       const prices = await storage.getMarketPrices();
-      
+
       res.json({
         connected: true,
         collections: {
@@ -367,7 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== ANALYTICS ====================
-  
+
   app.get("/api/analytics/:userId", async (req, res) => {
     try {
       const analytics = {
@@ -390,7 +390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           profitMargin: 42
         }
       };
-      
+
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch analytics" });

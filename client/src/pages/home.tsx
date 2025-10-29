@@ -7,6 +7,8 @@ import { WeatherAlert } from "@/components/weather-alert";
 export default function Home() {
   const [, setLocation] = useLocation();
   const t = useTranslation();
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
 
   const features = [
     {
@@ -55,6 +57,14 @@ export default function Home() {
 
   return (
     <div className="flex-1 pb-20 bg-background">
+      {/* Welcome Message */}
+      {user && (
+        <div className="bg-gradient-to-r from-farmer-green to-green-600 text-white p-6 mb-4">
+          <h2 className="text-2xl font-bold">Welcome back, {user.username}! 🌾</h2>
+          <p className="text-green-50 mt-1">Let's make today productive</p>
+        </div>
+      )}
+
       {/* Weather Alert */}
       <WeatherAlert 
         alertType="rain"

@@ -12,14 +12,15 @@ export function ThemeToggle() {
   return (
     <Button 
       variant="ghost" 
-      size="sm" 
+      size="icon" 
       onClick={toggleTheme}
-      className="h-8 w-8 px-0 text-white hover:bg-farmer-green-light"
+      className="touch-button text-white hover:bg-farmer-green-light"
+      title="Toggle Theme"
     >
       {actualTheme === 'light' ? (
-        <Sun className="h-4 w-4" />
+        <Moon className="h-5 w-5" />
       ) : (
-        <Moon className="h-4 w-4" />
+        <Sun className="h-5 w-5" />
       )}
       <span className="sr-only">Toggle theme</span>
     </Button>

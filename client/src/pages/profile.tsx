@@ -51,9 +51,9 @@ export default function Profile() {
   };
 
   const [userData, setUserData] = useState({
-    name: user.username,
-    phone: user.phone,
-    location: user.location,
+    name: user.username || "",
+    phone: user.phone || "",
+    location: user.location || "",
     farmSize: "5.5 acres",
     mainCrop: "Rice & Cotton"
   });
