@@ -15,6 +15,11 @@ export function BottomNavigation() {
     { icon: User, label: t.profile, path: "/profile" },
   ];
 
+  // Don't show navigation on login page
+  if (location === "/login") {
+    return null;
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 safe-area-pb">
       <div className="flex justify-around">
@@ -25,8 +30,8 @@ export function BottomNavigation() {
             onClick={() => setLocation(path)}
             className={cn(
               "flex flex-col items-center space-y-1 touch-button px-2 py-3 h-auto",
-              location === path 
-                ? "text-farmer-green" 
+              location === path
+                ? "text-farmer-green"
                 : "text-muted-foreground hover:text-farmer-green"
             )}
           >

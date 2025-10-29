@@ -59,8 +59,8 @@ export default function Login() {
         description: `Welcome ${data.username}!`
       });
       
-      // Small delay to ensure localStorage is written
-      setTimeout(() => setLocation("/"), 100);
+      // Redirect to home page
+      window.location.href = "/";
     } catch (error) {
       toast({
         title: "Error",

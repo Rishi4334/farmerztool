@@ -23,25 +23,21 @@ import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const [, setLocation] = useLocation();
   const user = localStorage.getItem("user");
   
   if (!user) {
-    setLocation("/login");
-    return null;
+    return <Login />;
   }
   
   return <Component />;
 }
 
 function Router() {
-  const user = localStorage.getItem("user");
-  
   return (
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/">
-        {user ? <Home /> : <Login />}
+        <ProtectedRoute component={Home} />
       </Route>
       <Route path="/plant-doctor">
         <ProtectedRoute component={PlantDoctor} />
